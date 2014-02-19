@@ -1,0 +1,4 @@
+Tried the official Library of Congress bagit : https://github.com/LibraryOfCongress/bagit-python
+and also "pybagit" : https://github.com/ahankinson/pybagit?source=cc
+
+I found that "pybagit" has more and nicer features. You can get the contents of the manifest directly, and it has utilities to update a bag if you alter the files in the data directory.
