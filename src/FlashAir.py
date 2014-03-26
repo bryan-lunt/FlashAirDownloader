@@ -1,7 +1,8 @@
 import urllib2
+from datetime import datetime
 
 class FlashAirFile(object):
-	READ_ONLY = 0b1
+	READ_ONLY  = 0b1
 	HIDDEN     = 0b10
 	SYSTEM     = 0b100
 	VOLUME     = 0b1000
@@ -13,8 +14,21 @@ class FlashAirFile(object):
 		self.filename = in_filename
 		self.size = int(in_size)
 		self.attributes = int(in_attributes)
-		self.date = int(in_date)#Worry about better conversion of these later
-		self.time = int(in_time)#Worry about conversion later.
+		
+		date_int = int(in_date)#Worry about better conversion of these later
+		year = ((date_int >> 9) & 0b1111111) + 1980
+		month = ((date_int >> 5) & 0b1111)
+		day = (date_int & 0b11111)
+		
+		time_int = int(in_time)#Worry about conversion later.
+		hour = ((time_int >> 11) & 0b11111)
+		minute = ((time_int >> 5) & 0b111111)
+		second = ((time_int & 0b11111))*2
+		
+		try:
+			self.date = datetime(year, month, day, hour, minute, second, 0)
+		except:
+			self.date = None#No time specified
 
 	def full_name(self):
 		return self.dir + "/" + self.filename
@@ -39,3 +53,15 @@ class FlashAirFile(object):
 	def is_dir(self):
 		return self.attributes & FlashAirFile.DIRECTORY
 
+	def search_dir(self):
+		if not self.is_dir():
+			raise Exception("This is not a directory.")
+
+		file_iterator = self.get_list()
+		for one_file in file_iterator:
+			if one_file.is_dir():
+				sub_iter = one_file.get_list()
+				for i in sub_iter:
+					yield i
+			else:
+				yield one_file
